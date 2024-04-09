@@ -111,32 +111,47 @@
     </div>
   </section>
   <script>
-	document.getElementById("activateAlarmButton").addEventListener("click", function() {
-	  // Send a request to activate the system
-	  activateSystem();
-	});
-  
-	function activateSystem() {
-	  fetch("http://192.168.1.100/activateSystem", {
-		method: "POST",
-		headers: {
-		  "Content-Type": "application/json"
-		},
-		body: JSON.stringify({ action: "activate" })
-	  })
-	  .then(response => {
-		if (response.ok) {
-		  console.log("System activated successfully");
-		  document.getElementById("systemStatus").innerText = "System Activated!";
-		} else {
-		  console.error("Failed to activate system");
-		}
-	  })
-	  .catch(error => {
-		console.error("Error:", error);
-	  });
-	}
+    // Function to toggle button text and action
+    function toggleButton() {
+      var button = document.getElementById("activateAlarmButton");
+      if (button.innerText === "Activate") {
+        button.innerText = "Deactivate";
+  // Add danger class
+      } else {
+        button.innerText = "Activate";
+    // Add primary class
+      }
+    }
+
+    // Event listener for button click
+    document.getElementById("activateAlarmButton").addEventListener("click", function() {
+      // Send a request to activate/deactivate the system
+      activateSystem();
+      // Toggle button text and color
+      toggleButton();
+    });
+
+    // Function to activate/deactivate the system
+    function activateSystem() {
+      fetch("http://192.168.1.100/activateSystem", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ action: "activate" })
+      })
+      .then(response => {
+        if (response.ok) {
+          console.log("System activated/deactivated successfully");
+          document.getElementById("systemStatus").innerText = "System Activated/Deactivated!";
+        } else {
+          console.error("Failed to activate/deactivate system");
+        }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+      });
+    }
   </script>
-  
 </body>
 </html>
