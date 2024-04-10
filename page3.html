@@ -90,7 +90,7 @@
           <div class="item-wrapper">
             <div class="card-box align-left">
               <h5 class="card-title mbr-fonts-style display-5">
-                <strong>Bed Si</strong></h5>
+                <strong>Bed Size</strong></h5>
               <p class="card-text mbr-fonts-style display-7">
                 Utilize this button to set the bed size.<br></p>
               <div class="mbr-section-btn mt-auto"><a class="btn btn-lg btn-primary display-7" href="page4.html" target="_blank">Click Here</a></div>
@@ -111,41 +111,28 @@
     </div>
   </section>
   <script>
-    // Function to toggle button text and action
     function toggleButton() {
       var button = document.getElementById("activateAlarmButton");
-      if (button.innerText === "Activate") {
-        button.innerText = "Deactivate";
-  // Add danger class
-      } else {
-        button.innerText = "Activate";
-    // Add primary class
-      }
+      var action = button.innerText === "Activate" ? "deactivateSystem" : "activateSystem"; // Adjusted to use GET request paths
+      button.innerText = button.innerText === "Activate" ? "Deactivate" : "Activate"; // Toggle button text
+      activateSystem(action); // Pass the action as a part of the path
     }
 
-    // Event listener for button click
     document.getElementById("activateAlarmButton").addEventListener("click", function() {
-      // Send a request to activate/deactivate the system
-      activateSystem();
-      // Toggle button text and color
-      toggleButton();
+      toggleButton(); // This now also handles calling the activateSystem function
     });
 
-    // Function to activate/deactivate the system
-    function activateSystem() {
-      fetch("http://172.17.143.119/activateSystem", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ action: "activate" })
+    function activateSystem(action) {
+      // Using fetch to send a GET request
+      fetch(`http://172.17.143.119/${action}`, { // Dynamically change the URL for GET request
+        method: "GET" // Changed to GET
       })
       .then(response => {
         if (response.ok) {
-          console.log("System activated/deactivated successfully");
-          document.getElementById("systemStatus").innerText = "System Activated/Deactivated!";
+          console.log("System " + (action === "activateSystem" ? "activated" : "deactivated") + " successfully");
+          document.getElementById("systemStatus").innerText = `System ${action === "activateSystem" ? "activated" : "deactivated"}!`;
         } else {
-          console.error("Failed to activate/deactivate system");
+          console.error("Failed to " + (action === "activateSystem" ? "activate" : "deactivate") + " system");
         }
       })
       .catch(error => {
