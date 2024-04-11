@@ -29,7 +29,7 @@
               <img src="assets/images/alertsense-cover-96x96.png" alt="Team Alpha" style="height: 3rem;">
             </a>
           </span>
-          <span class="navbar-caption-wrap"><a class="navbar-caption text-black text-primary display-4" href="index.html">AlertSense</a></span>
+          <span class="navbar-caption-wrap"><a class="navbar-caption text-black text-primary display-4" href="page3.html">AlertSense</a></span>
         </div>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbarSupportedContent" data-bs-target="#navbarSupportedContent" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
           <div class="hamburger">
@@ -41,16 +41,6 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav nav-dropdown" data-app-modern-menu="true">
-            <li class="nav-item"><a class="nav-link link text-black text-primary display-4" href="index.html#contacts02-9">Home</a></li>
-            <li class="nav-item">
-              <a class="nav-link link text-black text-primary display-4" href="page1.html">Team</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link link text-black text-primary display-4" href="page2.html" aria-expanded="false">Deliverables</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link link text-black text-primary display-4" href="page8.html">Gallery</a>
-            </li>
           </ul>
           <div class="navbar-buttons mbr-section-btn"><a class="btn btn-primary display-4" href="page3.html">Control Panel</a></div>
         </div>
@@ -90,55 +80,48 @@
           <div class="item-wrapper">
             <div class="card-box align-left">
               <h5 class="card-title mbr-fonts-style display-5">
-                <strong>Bed Size</strong></h5>
-              <p class="card-text mbr-fonts-style display-7">
-                Utilize this button to set the bed size.<br></p>
-              <div class="mbr-section-btn mt-auto"><a class="btn btn-lg btn-primary display-7" href="page4.html" target="_blank">Click Here</a></div>
-            </div>
-          </div>
-        </div>
-        <div class="item features-without-image col-12 col-md-6 col-lg-6">
-          <div class="item-wrapper">
-            <div class="card-box align-left">
-              <h5 class="card-title mbr-fonts-style display-5">
                 <strong>Set Alarms</strong></h5>
-              <p class="card-text mbr-fonts-style display-7">Utilize this button to set alarms.</p>
+              <p class="card-text mbr-fonts-style display-7">
+                Utilize this button to set alarms.<br></p>
               <div class="mbr-section-btn mt-auto"><a class="btn btn-lg btn-primary display-7" href="page5.html" target="_blank">Click Here</a></div>
             </div>
+          </div>
           </div>
         </div>
       </div>
     </div>
   </section>
   <script>
-    function toggleButton() {
-      var button = document.getElementById("activateAlarmButton");
-      var action = button.innerText === "Activate" ? "deactivateSystem" : "activateSystem"; // Adjusted to use GET request paths
-      button.innerText = button.innerText === "Activate" ? "Deactivate" : "Activate"; // Toggle button text
-      activateSystem(action); // Pass the action as a part of the path
-    }
+    let systemActivated = false;
 
     document.getElementById("activateAlarmButton").addEventListener("click", function() {
-      toggleButton(); // This now also handles calling the activateSystem function
+      sendBLECommand();
     });
 
-    function activateSystem(action) {
-      // Using fetch to send a GET request
-      fetch(`http://172.17.143.119/${action}`, { // Dynamically change the URL for GET request
-        method: "GET" // Changed to GET
-      })
-      .then(response => {
-        if (response.ok) {
-          console.log("System " + (action === "activateSystem" ? "activated" : "deactivated") + " successfully");
-          document.getElementById("systemStatus").innerText = `System ${action === "activateSystem" ? "activated" : "deactivated"}!`;
-        } else {
-          console.error("Failed to " + (action === "activateSystem" ? "activate" : "deactivate") + " system");
-        }
-      })
-      .catch(error => {
-        console.error("Error:", error);
-      });
+    function sendBLECommand() {
+      const serviceUUID = "19b10000-e8f2-537e-4f6c-d104768a1215"; // UUID for the BLE service
+      const characteristicUUID = "19b10001-e8f2-537e-4f6c-d104768a1215"; // UUID for the BLE characteristic
+
+      navigator.bluetooth.requestDevice({ filters: [{ services: [serviceUUID] }] })
+        .then(device => device.gatt.connect())
+        .then(server => server.getPrimaryService(serviceUUID))
+        .then(service => service.getCharacteristic(characteristicUUID))
+        .then(characteristic => {
+          const action = systemActivated ? 0 : 1; // Toggle action based on system activation status
+          const data = new Uint8Array([action]);
+          return characteristic.writeValue(data);
+        })
+        .then(() => {
+          systemActivated = !systemActivated; // Toggle system activation status
+          const button = document.getElementById("activateAlarmButton");
+          button.innerText = systemActivated ? "Deactivate" : "Activate";
+          console.log("BLE command sent successfully.");
+        })
+        .catch(error => {
+          console.error("Error sending BLE command:", error);
+        });
     }
-  </script>
+</script>
+
 </body>
 </html>
